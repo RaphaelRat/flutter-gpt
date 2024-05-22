@@ -8,16 +8,19 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = TextEditingController();
+    final apiController = TextEditingController();
     final minhasMsg = <String>[].obs;
     final chatMsg = <String>[].obs;
     final FocusNode focusNode = FocusNode();
+    final showApi = true.obs;
 
     void sendMessage() async {
+      showApi.value = false;
       minhasMsg.add(controller.text);
       final msg = controller.text;
       controller.clear();
       focusNode.requestFocus();
-      chatMsg.add(await fetchChatGPTResponse(msg));
+      chatMsg.add(await fetchChatGPTResponse(msg, apiController.text));
     }
 
     return Scaffold(
@@ -30,6 +33,7 @@ class HomePage extends StatelessWidget {
               onPressed: () {
                 minhasMsg.clear();
                 chatMsg.clear();
+                showApi.value = true;
               },
               icon: const Icon(Icons.delete))
         ],
@@ -40,6 +44,7 @@ class HomePage extends StatelessWidget {
           color: Colors.green,
           width: 720,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Obx(() => ListView.builder(
@@ -87,6 +92,22 @@ class HomePage extends StatelessWidget {
                   ),
                 ],
               ),
+              Obx(() => showApi.value
+                  ? Container(
+                      margin: const EdgeInsets.only(top: 16),
+                      width: 300,
+                      child: TextField(
+                        textInputAction: TextInputAction.send,
+                        controller: apiController,
+                        decoration: InputDecoration(
+                          hintText: "API KEY",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                      ),
+                    )
+                  : Container()),
               const SizedBox(height: 16),
             ],
           ),
